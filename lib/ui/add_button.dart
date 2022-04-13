@@ -1,5 +1,4 @@
 import 'package:datura/ui/constants.dart';
-import 'package:datura/util/grid.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 
@@ -119,9 +118,6 @@ class _AddButtonState extends State<AddButton> {
     );
   }
   Widget addButtonContent() {
-    const Duration duration = Duration(milliseconds: 2000);
-    const Curve curve = Curves.decelerate;
-
     return Column(
       key: stateOpened ? const ValueKey<int>(0) : const ValueKey<int>(1),
       children: [

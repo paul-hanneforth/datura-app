@@ -1,5 +1,4 @@
 import 'package:datura/pages/page.dart';
-import 'package:datura/util/date.dart';
 import 'package:datura/util/firebase.dart' as firebase;
 import 'package:datura/util/mode.dart';
 import 'package:datura/util/models.dart';
@@ -30,7 +29,7 @@ Future<void> setupFirebase() async {
   await firebase.setupCrashlytics();
 
   if(kDebugMode) {
-    print("DEBUG MODE!!!");
+    // await firebase.disableFirebaseTracking();
   }
 
 }
@@ -78,8 +77,8 @@ class AppState extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(AppState old) {
-    print("AppState was modified! The Descendants will be notified!");
+  bool updateShouldNotify(AppState oldWidget) {
+    debugPrint("[main.dart] [AppState] AppState was modified! The Descendants will be notified!");
     return true;
   }
 
@@ -96,7 +95,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  Mode mode = Mode.production;
+  Mode mode = kDebugMode ? Mode.development : Mode.production;
   WeightEntriesModel model = WeightEntriesModel();
   Database? db;
 
@@ -183,7 +182,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print("[!!!] Rebuilding entire App!");
+    debugPrint("[main.dart] [MyApp] Rebuilding entire App!");
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown

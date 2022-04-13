@@ -1,9 +1,7 @@
 import 'package:datura/pages/page.dart';
 import 'package:datura/ui/constants.dart';
 import 'package:datura/util/date.dart';
-import 'package:datura/util/faker.dart';
 import 'package:datura/util/models.dart';
-import 'package:datura/util/rand.dart';
 import 'package:datura/util/types.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';

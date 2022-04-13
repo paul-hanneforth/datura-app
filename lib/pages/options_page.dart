@@ -4,7 +4,6 @@ import 'package:datura/ui/option.dart';
 import 'package:datura/ui/page_height.dart';
 import 'package:datura/util/grid.dart';
 import 'package:datura/util/mode.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 

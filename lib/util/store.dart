@@ -7,10 +7,12 @@ import 'package:path/path.dart';
 
 // const String databasePath = "store.db";
 
+bool dbLogging = false;
+
 String databasePath(Mode mode) => mode == Mode.production ? "prod.db" : "dev.db";
 
 Future<Database> openStoreDatabase(String databasePath) async {
-  print("Opening Database ...");
+  if(dbLogging) debugPrint("[store.dart] Opening Database ...");
   return openDatabase(
     join(await getDatabasesPath(), databasePath),
     onCreate: (db, version) {
@@ -26,12 +28,12 @@ Future<void> wipeStoreDatabase(String databasePath) async {
 }
 
 Future<void> insertWeightEntry(Database db, IndexedWeightEntry weightEntry) async {
-  if(!db.isOpen) print("Database is not open!");
+  if(!db.isOpen) debugPrint("[store.dart] Database is not open!");
 
   await db.insert("entries", weightEntry.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
 }
 Future<IndexedWeightEntry> insertUnindexedWeightEntry(Database db, WeightEntry weightEntry) async {
-  if(!db.isOpen) print("Database is not open!");
+  if(!db.isOpen) debugPrint("[store.dart] Database is not open!");
 
   final String id = Rand.randomId();
   final IndexedWeightEntry indexedWeightEntry = IndexedWeightEntry(id: id, weight: weightEntry.weight, date: weightEntry.date, weightUnit: weightEntry.weightUnit);
@@ -41,7 +43,7 @@ Future<IndexedWeightEntry> insertUnindexedWeightEntry(Database db, WeightEntry w
   return indexedWeightEntry;
 }
 Future<List<IndexedWeightEntry>> retrieveWeightEntries(Database db, [ DateTimeRange? timeRange ]) async {
-  if(!db.isOpen) print("Database is not open!");
+  if(!db.isOpen) debugPrint("[store.dart] Database is not open!");
 
   if(timeRange != null) {
     final List<Map<String, dynamic>> maps = await db.query('entries', where: "date > ? AND date < ?", whereArgs: [timeRange.start.microsecondsSinceEpoch, timeRange.end.microsecondsSinceEpoch]);
@@ -53,7 +55,7 @@ Future<List<IndexedWeightEntry>> retrieveWeightEntries(Database db, [ DateTimeRa
 
 }
 Future<void> removeWeightEntry(Database db, IndexedWeightEntry weightEntry) async {
-  if(!db.isOpen) print("Database is not open!");
+  if(!db.isOpen) debugPrint("[store.dart] Database is not open!");
 
   /* int affected = */await db.delete('entries', where: "id = ?", whereArgs: [weightEntry.id]);
 }

@@ -122,6 +122,7 @@ class IndexedWeightEntry extends WeightEntry {
     };
   }
 
+  @override
   IndexedWeightEntry copyWith({
     weight,
     date,

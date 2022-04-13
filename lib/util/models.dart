@@ -1,6 +1,4 @@
-import 'package:datura/util/date.dart';
 import 'package:datura/util/rand.dart';
-import 'package:datura/util/store.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
 
@@ -9,10 +7,9 @@ class WeightEntryModel extends ValueNotifier<IndexedWeightEntry> {
   WeightEntryModel(value) : super(value);
   
   setReview(Review updatedReview) {
-    print("Updating Review from ${value.review} to ${updatedReview}!");
     value = value.copyWith(review: updatedReview);
   }
-  update(WeightEntry updatedEntry) {
+  set(WeightEntry updatedEntry) {
     value = value.copyWith(review: updatedEntry.review, weight: updatedEntry.weight, date: updatedEntry.date, weightUnit: updatedEntry.weightUnit);
   }
 
@@ -48,8 +45,6 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
   @override
   void notifyListeners() {
     super.notifyListeners();
-
-    print("WeightEntriesModel.notifyListeners()");
   }
 
   void addWeightEntry(IndexedWeightEntry indexedWeightEntry) {
@@ -62,7 +57,7 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
 
     value.add(weightEntryModel);
 
-    print("notifying ${onAddListeners.length} onAddListeners");
+    debugPrint("[models.dart] [WeightEntriesModel] notifying ${onAddListeners.length} onAddListeners");
 
     for(final listener in onAddListeners) {
       listener(weightEntryModel);
@@ -81,8 +76,6 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
     for(final listener in onRemoveListeners) {
       listener(entry);
     }
-
-    print("notifying ${onAddListeners.length} onRemoveListeners");
 
     super.notifyListeners();
   }
@@ -167,17 +160,16 @@ class WeightEntriesModelShadow extends ValueNotifier<List<WeightEntryModel>> {
     super.removeListener(listener);
 
     if(!hasListeners && mounted) {
-      print("This WeightEntriesModelShadow doesn't seem to have any listeners anymore. It will be automatically disposed.");
+      debugPrint("[models.dart] [WeightEntriesModelShadow] This WeightEntriesModelShadow doesn't seem to have any listeners anymore. It will be automatically disposed.");
       dispose();
     }
   }
 
   @override
   void dispose() {
-    print("WeightEntriesModelShadow.dispose()");
     if(!mounted) return;
 
-    // super.dispose();
+    super.dispose();
     disposeListeners();
 
     _mounted = false;

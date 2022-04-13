@@ -125,8 +125,10 @@ class BetterDateTime extends DateTime {
 class BetterDateTimeRange extends DateTimeRange {
   
   @override
+  // ignore: overridden_fields
   final BetterDateTime start;
   @override
+  // ignore: overridden_fields
   final BetterDateTime end;
 
   BetterDateTimeRange({ 

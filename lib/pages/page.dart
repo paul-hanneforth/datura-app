@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:datura/main.dart';
 import 'package:datura/pages/options_page.dart';
 import 'package:datura/pages/weight_entry_page.dart';
@@ -73,15 +71,13 @@ class _MainPageScreenState extends State<MainPageScreen> {
       updateTimeRange(timeRange);
     } else if(updatedWeightEntry is WeightEntry) {
       // entry should be updated
-      weightEntryModel.update(updatedWeightEntry);
+      weightEntryModel.set(updatedWeightEntry);
       
       // update UI
       updateTimeRange(timeRange);
     }
   }
   void restoreLastDeletedWeightEntry() {
-    print("Restoring Weight Entry ...");
-
     if(lastDeletedWeightEntry != null) {
       AppState.of(context).model.addWeightEntry(lastDeletedWeightEntry!);
       updateTimeRange(timeRange);
@@ -132,8 +128,6 @@ class _MainPageScreenState extends State<MainPageScreen> {
   void initState() {
     super.initState();
 
-    print("initState (${widget.initialTimeRange.start.monthName})");
-
     timeRange = widget.initialTimeRange;
 
     Future.delayed(const Duration(seconds: 0)).then((dynamic) {
@@ -146,7 +140,6 @@ class _MainPageScreenState extends State<MainPageScreen> {
   @override
   void dispose() {
     super.dispose();
-    print("Dispose! (${widget.initialTimeRange.start.monthName})");
 
     modelShadow.dispose();
   }
@@ -205,7 +198,6 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Build! (${widget.initialTimeRange.start.monthName})");
 
     // dispose Listeners if modelShadow has been initialized with a shader
     /* if(modelShadow.shader != null) {
@@ -395,7 +387,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => (grid.rowHeight(pageHeight) * 2) + grid.gutter + pageTopPadding;
 
   @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate old) {
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
     return true;
   }
 
