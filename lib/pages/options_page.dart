@@ -23,8 +23,8 @@ class _OptionsPageState extends State<OptionsPage> {
     Navigator.of(context).pop();
   }
   void reset() {
-    showAlertDialogWidget(context, () {
-      resetData();
+    showAlertDialogWidget(context, () async {
+      await AppState.of(context).resetData();
       Navigator.of(context).pop();
     });
   }
@@ -134,7 +134,7 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
 
     setState(() => loading = true );
 
-    await setMode(newMode);
+    await AppState.of(context).switchMode(newMode);
 
     setState(() => loading = false );
   }

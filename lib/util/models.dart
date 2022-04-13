@@ -39,6 +39,12 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
   void removeOnAddListener(void Function(WeightEntryModel weightEntryModel) listener) => onAddListeners.remove(listener);
   void removeOnUpdateListener(void Function(WeightEntryModel ) listener) => onUpdateListeners.remove(listener);
 
+  void disposeAllListeners() {
+    onRemoveListeners.clear();
+    onAddListeners.clear();
+    onUpdateListeners.clear();
+  }
+
   @override
   void notifyListeners() {
     super.notifyListeners();

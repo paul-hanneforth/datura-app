@@ -1,4 +1,4 @@
-import 'package:datura/util/date.dart';
+import 'package:datura/util/mode.dart';
 import 'package:datura/util/rand.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +6,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 // const String databasePath = "store.db";
+
+String databasePath(Mode mode) => mode == Mode.production ? "prod.db" : "dev.db";
 
 Future<Database> openStoreDatabase(String databasePath) async {
   print("Opening Database ...");
