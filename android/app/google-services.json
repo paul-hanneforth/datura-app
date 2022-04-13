@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "407385855023",
+    "project_id": "datura-ac631",
+    "storage_bucket": "datura-ac631.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407385855023:android:e5b9aa9976e562f45a62da",
+        "android_client_info": {
+          "package_name": "com.hanneforth.datura"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "407385855023-ckrii23n959jnp9pg9rdpqiqnku8rti0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hanneforth.datura",
+            "certificate_hash": "9aeff9c1966d296d4d18e41a1d273601535067be"
+          }
+        },
+        {
+          "client_id": "407385855023-j9ia4hpor2gdkc91ak9mv8lcorugssmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4cqOKqkYxXsWoKKyVoG9AWcq1-GS6gy0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "407385855023-j9ia4hpor2gdkc91ak9mv8lcorugssmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
