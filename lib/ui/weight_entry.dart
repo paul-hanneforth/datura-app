@@ -1,4 +1,4 @@
-import 'package:datura/pages/page2.dart';
+import 'package:datura/pages/page.dart';
 import 'package:datura/ui/constants.dart';
 import 'package:datura/util/date.dart';
 import 'package:datura/util/faker.dart';
