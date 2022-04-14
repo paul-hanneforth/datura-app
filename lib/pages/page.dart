@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:datura/main.dart';
 import 'package:datura/pages/options_page.dart';
 import 'package:datura/pages/weight_entry_page.dart';
@@ -162,17 +164,37 @@ class _MainPageScreenState extends State<MainPageScreen> {
                 (context, index) {
                   final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
 
-                  return WeightEntryWidget(
-                    grid: grid.define(pageSafeAreaHeight()),
-                    horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
-                    pointSystemConstant: pointSystemConstant,
-                    review: indexedWeightEntry.review ?? Review.unset,
-                    weight: indexedWeightEntry.weight,
-                    weightUnit: indexedWeightEntry.weightUnit,
-                    average: false,
-                    dateTime: indexedWeightEntry.date,
-                    bottomBorder: weightEntries.length == index + 1,
-                    onTap: () => weightEntryOnTap(weightEntries[index]),
+                  return Stack(
+                    children: [
+                      WeightEntryWidget(
+                        grid: grid.define(pageSafeAreaHeight()),
+                        horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
+                        pointSystemConstant: pointSystemConstant,
+                        review: indexedWeightEntry.review ?? Review.unset,
+                        weight: indexedWeightEntry.weight,
+                        weightUnit: indexedWeightEntry.weightUnit,
+                        average: false,
+                        dateTime: indexedWeightEntry.date,
+                        bottomBorder: weightEntries.length == index + 1,
+                        onTap: () => weightEntryOnTap(weightEntries[index]),
+                      ),
+                      /* Positioned(
+                        top: -(pointSystemConstant * 1.5),
+                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                        child: Transform.rotate(
+                          angle: -pi * 0.5,
+                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -(pointSystemConstant * 1.5),
+                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                        child: Transform.rotate(
+                          angle: -pi * 0.5,
+                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                        ),
+                      ), */
+                    ]
                   );
                 },
                 childCount: weightEntries.length

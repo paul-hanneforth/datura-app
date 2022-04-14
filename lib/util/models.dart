@@ -144,7 +144,7 @@ class WeightEntriesModelShadow extends ValueNotifier<List<WeightEntryModel>> {
 
   @override
   void removeListener(void Function() listener) {
-    print("[models.dart] [WeightEntriesModelShadow] removeListener()");
+    debugPrint("[models.dart] [WeightEntriesModelShadow] removeListener()");
 
     super.removeListener(listener);
 
