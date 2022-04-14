@@ -128,12 +128,6 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
     timeRange = widget.initialTimeRange;
 
-    Future.delayed(const Duration(seconds: 0)).then((dynamic) {
-
-      // updateTimeRange(timeRange);
-
-    });
-
   }
   @override
   void dispose() {
@@ -218,7 +212,7 @@ class _MainPageScreenState extends State<MainPageScreen> {
             child: scrollableSectionWidget(),
           ),
           AddButton(
-            elementHeight: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+            grid: grid.define(pageSafeAreaHeight()),
             pointSystemConstant: pointSystemConstant,
             onSaveNewEntry: (double weight) {
               addWeightEntry(weight);
