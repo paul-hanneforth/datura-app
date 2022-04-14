@@ -16,7 +16,7 @@ Future<void> reviewWeightEntries(ReviewEngine engine, model) async {
     final Review review = engine.review(weightEntryModel.value);
 
     if(weightEntryModel.value.review != review) {
-      weightEntryModel.setReview(review);
+      weightEntryModel.set(weightEntryModel.value.copyWith(review: review));
     }
   }
 

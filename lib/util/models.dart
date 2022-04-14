@@ -5,17 +5,9 @@ import 'package:flutter/material.dart';
 class WeightEntryModel extends ValueNotifier<IndexedWeightEntry> {
 
   WeightEntryModel(value) : super(value);
-  
-  setReview(Review updatedReview) {
-    value = value.copyWith(review: updatedReview);
-  }
+
   set(WeightEntry updatedEntry) {
     value = value.copyWith(review: updatedEntry.review, weight: updatedEntry.weight, date: updatedEntry.date, weightUnit: updatedEntry.weightUnit);
-  }
-
-  @override
-  notifyListeners() {
-    super.notifyListeners();
   }
 
 }
@@ -40,11 +32,6 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
     onRemoveListeners.clear();
     onAddListeners.clear();
     onUpdateListeners.clear();
-  }
-
-  @override
-  void notifyListeners() {
-    super.notifyListeners();
   }
 
   void addWeightEntry(IndexedWeightEntry indexedWeightEntry) {
@@ -80,7 +67,7 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
     super.notifyListeners();
   }
 
-  WeightEntriesModelShadow shadow(DateTimeRange timeRange) {
+  WeightEntriesModelShadow createShadow(DateTimeRange timeRange) {
 
     final WeightEntriesModelShadow newModel = WeightEntriesModelShadow(shader: this, timeRange: timeRange);
 

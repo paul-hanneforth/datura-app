@@ -198,13 +198,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    // dispose Listeners if modelShadow has been initialized with a shader
-    /* if(modelShadow.shader != null) {
-      modelShadow.disposeListeners();
-    } */
     // create new shadow based on new timeRange
-    modelShadow = AppState.of(context).model.shadow(timeRange);
+    modelShadow = AppState.of(context).model.createShadow(timeRange);
 
     return SafeArea(
       top: false,

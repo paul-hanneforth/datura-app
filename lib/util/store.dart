@@ -60,7 +60,6 @@ Future<void> removeWeightEntry(Database db, IndexedWeightEntry weightEntry) asyn
   /* int affected = */await db.delete('entries', where: "id = ?", whereArgs: [weightEntry.id]);
 }
 Future<void> updateWeightEntry(Database db, String weightEntryId, IndexedWeightEntry updatedWeightEntry) async {
-  print("Update DB!");
 
   await db.update(
     "entries",
