@@ -101,7 +101,21 @@ class WeightEntryWidget extends StatelessWidget {
                   dateTime: dateTime,
                   dateTimeRange: dateTimeRange
                 ),
-                Text(weightAsText(weight) + weightUnit.name, style: GoogleFonts.inter(
+                average ? Column(
+                  children: [
+                    Text("avg.", style: GoogleFonts.inter(
+                      fontSize: pointSystemConstant * 2,
+                      fontWeight: FontWeight.w400,
+                      color: Constants.black50
+                    )),
+                    SizedBox(height: pointSystemConstant),
+                    Text(weightAsText(weight) + weightUnit.name, style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w400,
+                      fontSize: pointSystemConstant * 3
+                    )),
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                ) : Text(weightAsText(weight) + weightUnit.name, style: GoogleFonts.inter(
                   fontWeight: FontWeight.w400,
                   fontSize: pointSystemConstant * 3
                 )),
