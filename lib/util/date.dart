@@ -14,9 +14,20 @@ class BetterDateTime extends DateTime {
     int second = 0,
     int millisecond = 0,
   }) : super(year, month, day, hour, minute, second, millisecond);
+  BetterDateTime.startOfTime() : this.at(year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, millisecond: 0);
 
-  String format({ bool padZeros = false }) {
-    return day.toString().padLeft(padZeros ? 2 : 1, "0") + "." + month.toString().padLeft(padZeros ? 2 : 1, "0") + "." + year.toString().padLeft(padZeros ? 4 : 1, "0");
+  String format({ 
+    bool padZeros = false,
+    bool year = true,
+    bool month = true,
+    bool day = true
+  }) {
+
+    String yearText = year ? this.year.toString().padLeft(padZeros ? 4 : 1, "0") : "";
+    String monthText = month ? this.month.toString().padLeft(padZeros ? 2 : 1, "0") : "";
+    String dayText = day ? this.day.toString().padLeft(padZeros ? 2 : 1, "0") : "";
+
+    return "$dayText${monthText == "" ? "" : ".$monthText"}${yearText == "" ? "" : ".$yearText"}";
   }
   String timeOfDay({ bool padZeros = false }) {
     return hour.toString().padLeft(padZeros ? 2 : 1, "0") + ":" + minute.toString().padLeft(padZeros ? 2 : 1, "0");
@@ -48,6 +59,8 @@ class BetterDateTime extends DateTime {
   String toString() {
     return detailedFormat();
   }
+
+  bool isToday() => day == DateTime.now().day && month == DateTime.now().month && year == DateTime.now().year;
 
   BetterDateTime toDayStart() {
     final BetterDateTime dayStart = subtract(Duration(microseconds: microsecond))
@@ -144,6 +157,21 @@ class BetterDateTimeRange extends DateTimeRange {
   static BetterDateTimeRange fromDateTimeRange(DateTimeRange timeRange) => BetterDateTimeRange(start: BetterDateTime.fromDateTime(timeRange.start), end: BetterDateTime.fromDateTime(timeRange.end));
 
   BetterDateTimeRange shift(Duration duration) => BetterDateTimeRange(start: start.add(duration), end: end.add(duration));
+
+  String format({
+    bool year = false,
+    bool padZeros = true,
+    bool forHumans = false
+  }) {
+    if(forHumans) {
+      final String start = this.start.isToday() ? "Today" : this.start.format(padZeros: padZeros, year: year);
+      final String end = this.end.isToday() ? "Today" : this.end.format(padZeros: padZeros, year: year);
+
+      return "$start - $end";
+    }
+
+    return "${start.format(padZeros: padZeros, year: year)} - ${end.format(padZeros: padZeros, year: year)}";
+  }
 
 }
 

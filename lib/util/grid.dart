@@ -70,7 +70,7 @@ class DefinedVerticalGrid extends VerticalGrid {
 
   final double space;
 
-  double get definedRowHeight => ((space - margin) - ((count - 1) * gutter)) / count;
+  double get definedRowHeight => ((space - (2 * margin)) - ((count - 1) * gutter)) / count;
 
 }
 
@@ -86,8 +86,6 @@ class HorizontalGrid {
   final double gutter;
   final double margin;
 
-  double columnWidth(double space) {
-    return ((space - margin) - ((count - 1) * gutter)) / count;
-  }
+  double columnWidth(double space) => ((space - (2 * margin)) - ((count - 1) * gutter)) / count;
 
 }

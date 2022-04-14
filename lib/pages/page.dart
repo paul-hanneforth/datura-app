@@ -180,11 +180,18 @@ class _MainPageScreenState extends State<MainPageScreen> {
             return SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
+                  final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
+
                   return WeightEntryWidget(
                     height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
-                    weightEntryModel: weightEntries[index],
+                    review: indexedWeightEntry.review ?? Review.unset,
+                    weight: indexedWeightEntry.weight,
+                    weightUnit: indexedWeightEntry.weightUnit,
+                    average: false,
+                    // dateTime: indexedWeightEntry.date,
+                    dateTimeRange: BetterDateTimeRange(start: indexedWeightEntry.date, end: indexedWeightEntry.date.add(const Duration(days: 4))),
                     bottomBorder: weightEntries.length == index + 1,
-                    onTap: weightEntryOnTap
+                    onTap: () => weightEntryOnTap(weightEntries[index]),
                   );
                 },
                 childCount: weightEntries.length

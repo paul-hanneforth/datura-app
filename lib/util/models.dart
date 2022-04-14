@@ -103,10 +103,10 @@ class WeightEntriesModelShadow extends ValueNotifier<List<WeightEntryModel>> {
   void addWeightEntryModel(WeightEntryModel weightEntryModel) {
     int index = 0;
     for(final addedWeightEntryModel in value) {
-      if(addedWeightEntryModel.value.date.isBefore(weightEntryModel.value.date)) {
+      if(addedWeightEntryModel.value.date.isAfter(weightEntryModel.value.date)) {
         index++;
       }
-    }    
+    }
 
     value.insert(index, weightEntryModel);
 
