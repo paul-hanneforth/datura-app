@@ -45,15 +45,9 @@ class _MainPageScreenState extends State<MainPageScreen> {
     AppState.of(context).model.addUnindexedWeightEntry(Faker.weight().copyWith(date: BetterDateTime(), weight: weight));
 
     firebase.logAddWeightEntryEvent();
-
-    // update UI
-    updateTimeRange(timeRange);
   }
   void removeWeightEntry(WeightEntryModel weightEntryModel) {
     AppState.of(context).model.removeWeightEntry(weightEntryModel);
-
-    // update UI
-    updateTimeRange(timeRange);
   }
   void weightEntryOnTap(WeightEntryModel weightEntryModel) async {
     dynamic updatedWeightEntry = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => WeightEntryPage(weightEntry: weightEntryModel.value)));
@@ -64,21 +58,14 @@ class _MainPageScreenState extends State<MainPageScreen> {
       lastDeletedWeightEntry = weightEntryModel.value;
 
       showDeleteRedoSnackbar();
-
-      // update UI
-      updateTimeRange(timeRange);
     } else if(updatedWeightEntry is WeightEntry) {
       // entry should be updated
       weightEntryModel.set(updatedWeightEntry);
-      
-      // update UI
-      updateTimeRange(timeRange);
     }
   }
   void restoreLastDeletedWeightEntry() {
     if(lastDeletedWeightEntry != null) {
       AppState.of(context).model.addWeightEntry(lastDeletedWeightEntry!);
-      updateTimeRange(timeRange);
     }
   }
   void showDeleteRedoSnackbar() {
@@ -127,7 +114,6 @@ class _MainPageScreenState extends State<MainPageScreen> {
     super.initState();
 
     timeRange = widget.initialTimeRange;
-
   }
   @override
   void dispose() {
