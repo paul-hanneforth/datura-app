@@ -30,13 +30,11 @@ class MainPageScreen extends StatefulWidget {
 
 }
 
-const pointSystemConstant = 20.2 / Constants.ratio; // equals 8px
-const VerticalGrid grid = VerticalGrid(count: 8, gutter: (pointSystemConstant * 2), margin: 0);
-const HorizontalGrid horizontalGrid = HorizontalGrid(count: 3, gutter: (pointSystemConstant * 2), margin: (pointSystemConstant * 4));
-
 class _MainPageScreenState extends State<MainPageScreen> {
 
-  // WeightEntriesModel get weightEntriesModel => AppState.of(context).model;
+  static const pointSystemConstant = 20.2 / Constants.ratio; // equals 8px
+  static const VerticalGrid grid = VerticalGrid(count: 8, gutter: (pointSystemConstant * 2), margin: 0);
+  static const HorizontalGrid horizontalGrid = HorizontalGrid(count: 3, gutter: (pointSystemConstant * 2), margin: (pointSystemConstant * 4));
 
   BetterDateTimeRange timeRange = BetterDateTimeRange.today();
   WeightEntriesModelShadow modelShadow = WeightEntriesModelShadow();
@@ -166,6 +164,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
         SliverPersistentHeader(
           pinned: true,
           delegate: HeaderDelegate(
+            grid: grid,
+            pointSystemConstant: pointSystemConstant,
             pageTopPadding: pageTopPadding(),
             onSelect: (DateTimeRange selectedTimeRange) {
               updateTimeRange(BetterDateTimeRange.fromDateTimeRange(selectedTimeRange));
@@ -183,13 +183,14 @@ class _MainPageScreenState extends State<MainPageScreen> {
                   final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
 
                   return WeightEntryWidget(
-                    height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+                    grid: grid.define(pageSafeAreaHeight()),
+                    horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
+                    pointSystemConstant: pointSystemConstant,
                     review: indexedWeightEntry.review ?? Review.unset,
                     weight: indexedWeightEntry.weight,
                     weightUnit: indexedWeightEntry.weightUnit,
                     average: false,
-                    // dateTime: indexedWeightEntry.date,
-                    dateTimeRange: BetterDateTimeRange(start: indexedWeightEntry.date, end: indexedWeightEntry.date.add(const Duration(days: 4))),
+                    dateTime: indexedWeightEntry.date,
                     bottomBorder: weightEntries.length == index + 1,
                     onTap: () => weightEntryOnTap(weightEntries[index]),
                   );
@@ -240,12 +241,17 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
 class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
-  HeaderDelegate({ 
+  HeaderDelegate({
+    required this.pointSystemConstant,
+    required this.grid,
     required this.pageTopPadding,
     required this.pageHeight,
     required this.timeRange,
     required this.onSelect,
   });
+
+  final double pointSystemConstant;
+  final VerticalGrid grid;
 
   final double pageTopPadding;
   final double pageHeight;
@@ -254,15 +260,15 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   void openOptionsPage(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => const OptionsPage()));
-  } 
+  }
 
   String timeRangeText(BetterDateTimeRange range) {
     // TODO
     if(timeRange.start.month == timeRange.end.month && timeRange.start.year == timeRange.end.year) {
       // timeRange spans over the same month
-      return BetterDateTime.fromDateTime(range.start).monthName;  
+      return range.start.monthName;  
     } else {
-      return BetterDateTime.fromDateTime(range.start).monthName;
+      return range.format(forHumans: true, padZeros: true, year: false);
     }
   }
 
@@ -297,11 +303,11 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
     final double headerWidth = MediaQuery.of(context).size.width;
     double spacing = pointSystemConstant * 2;
   
-    const double titleFontSize = pointSystemConstant * 4;
-    const double subtitleFontSize = pointSystemConstant * 2;
+    double titleFontSize = pointSystemConstant * 4;
+    double subtitleFontSize = pointSystemConstant * 2;
     final subtitleTextStyle = GoogleFonts.inter(fontSize: subtitleFontSize, fontWeight: FontWeight.w400, color: Constants.white);
 
-    const double dateTextWidgetsSpacing = pointSystemConstant;
+    double dateTextWidgetsSpacing = pointSystemConstant;
 
     return Center(
       child: SizedBox(
@@ -322,9 +328,9 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
                   date: BetterDateTime.fromDateTime(timeRange.start),
                   style: subtitleTextStyle
                 ),
-                const SizedBox(width: dateTextWidgetsSpacing),
+                SizedBox(width: dateTextWidgetsSpacing),
                 Text("-", style: subtitleTextStyle),
-                const SizedBox(width: dateTextWidgetsSpacing),
+                SizedBox(width: dateTextWidgetsSpacing),
                 dateTextWidget(
                   isFirstDate: false,
                   context: context,
@@ -343,14 +349,14 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   }
   Widget optionsButtonWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: (2 * pointSystemConstant), top: (2 * pointSystemConstant)),
+      padding: EdgeInsets.only(right: (2 * pointSystemConstant), top: (2 * pointSystemConstant)),
       child: Material(
         color: Constants.transparent,
         child: InkWell(
           onTap: () {
             openOptionsPage(context);
           },
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(pointSystemConstant * 3),
             child: Icon(Icons.more_vert, size: pointSystemConstant * 4, color: Constants.white),
           )
