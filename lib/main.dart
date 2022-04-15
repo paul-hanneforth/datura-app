@@ -1,4 +1,5 @@
 import 'package:datura/pages/page.dart';
+import 'package:datura/util/date.dart';
 import 'package:datura/util/faker.dart';
 import 'package:datura/util/firebase.dart' as firebase;
 import 'package:datura/util/id.dart';
@@ -9,7 +10,10 @@ import 'package:datura/util/store.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sdcl/health_data/health_data.dart' as sdcl;
+import 'package:sdcl/health_data/weight.dart' as sdcl;
 import 'package:sdcl/identifiables.dart' as sdcl;
+import 'package:sdcl/sdcl.dart' as sdcl;
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
@@ -36,11 +40,28 @@ Future<void> setupFirebase() async {
   }
 
 }
-Future<void> recordWeightEntryInFirebase(IndexedWeightEntry indexedWeightEntry) async {
+Future<void> pushBlockToFirebase(List<IndexedWeightEntry> weightEntries) async {
 
   final String? deviceId = await getDeviceId();
-  print(deviceId);
-  // final sdcl.Identifiable identifyUser = sdcl.Identifiable(value: );  
+  final sdcl.Identifiable userIdentifable = sdcl.Identifiable(value: deviceId);  
+  final sdcl.Identifiable timestampIdentifiable = sdcl.Identifiable(value: BetterDateTime().toIso8601String());
+  
+  final sdcl.Block block = sdcl.Block(
+    identifiables: [ userIdentifable, timestampIdentifiable ],
+    healthData: sdcl.HealthData(
+      weightList: weightEntries.map<sdcl.Weight>((e) {
+        final sdcl.WeightUnit weightUnit = e.weightUnit == WeightUnit.kilogram ? sdcl.WeightUnit.kilogram : sdcl.WeightUnit.unset;
+
+        return sdcl.Weight(
+          date: e.date,
+          weight: e.weight,
+          weightUnit: weightUnit
+        );
+      }).toList()
+    )
+  );
+
+  await firebase.addBlock(block);
 
 }
 
@@ -139,10 +160,6 @@ class _MyAppState extends State<MyApp> {
     model.addOnUpdateListener((weightEntryModel) => reviewAllWeightEntries());
     model.addOnAddListener((weightEntryModel) => reviewAllWeightEntries());
     model.addOnRemoveListener((weightEntryModel) => reviewAllWeightEntries());
-
-    // firebase
-    // model.addOnAddListener((weisghtEntryModel) => recordWeightEntryInFirebase(weightEntryModel.value));
-    // model.addOnUpdateListener((weightEntryModel) => recordWeightEntryInFirebase(weightEntryModel.value));
 
   }
   void reviewAllWeightEntries() {
