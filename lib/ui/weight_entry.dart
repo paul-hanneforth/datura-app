@@ -1,9 +1,6 @@
-import 'package:datura/pages/page2.dart';
 import 'package:datura/ui/constants.dart';
 import 'package:datura/util/date.dart';
-import 'package:datura/util/faker.dart';
-import 'package:datura/util/models.dart';
-import 'package:datura/util/rand.dart';
+import 'package:datura/util/grid.dart';
 import 'package:datura/util/types.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
@@ -11,16 +8,32 @@ import 'package:google_fonts/google_fonts.dart';
 class WeightEntryWidget extends StatelessWidget {
   const WeightEntryWidget({ 
     Key? key,
-    required this.height,
-    required this.weightEntryModel,
+    required this.pointSystemConstant,
+    required this.grid,
+    required this.horizontalGrid,
+
+    required this.weight,
+    required this.review,
+    this.dateTime,
+    this.dateTimeRange,
+    this.weightUnit = WeightUnit.kilogram,
+    this.average = false,
     this.bottomBorder = false,
     this.onTap
-  }) : super(key: key);
+  }) : assert((dateTime != null || dateTimeRange != null) && !(dateTime != null && dateTimeRange != null)), super(key: key);
 
-  final num height;
+  final double pointSystemConstant;
+  final DefinedVerticalGrid grid;
+  final DefinedHorizontalGrid horizontalGrid;
+
   final bool bottomBorder;
-  final WeightEntryModel weightEntryModel;
-  final void Function(WeightEntryModel weightEntryModel)? onTap;
+  final Review review;
+  final num weight;
+  final WeightUnit weightUnit;
+  final bool average;
+  final BetterDateTime? dateTime;
+  final BetterDateTimeRange? dateTimeRange;
+  final void Function()? onTap;
 
   String weightAsText(num weight) {
     if(weight % 1 != 0) {
@@ -30,11 +43,17 @@ class WeightEntryWidget extends StatelessWidget {
     return weight.toStringAsFixed(0);
   }
 
-  // TODO: allow also to pass a timeRange
-  Widget dateTextWidget(BetterDateTime date) {
+  Widget dateTextWidget({
+    BetterDateTime? dateTime,
+    BetterDateTimeRange? dateTimeRange
+  }) {
+    assert((dateTime != null || dateTimeRange != null) && !(dateTime != null && dateTimeRange != null));
+
+    String text = dateTime != null ? dateTime.day.toString() + "th" : dateTimeRange!.format(forHumans: true);
+
     return SizedBox(
-      width: pointSystemConstant * 10, // just a random value
-      child: Text(BetterDateTime.fromDateTime(date).format()/* date.day.toString() + "th" */, style: GoogleFonts.inter(
+      width: horizontalGrid.definedColumnWidth,
+      child: Text(text, style: GoogleFonts.inter(
         fontSize: pointSystemConstant * 2,
         fontWeight: FontWeight.w400
       )),
@@ -44,7 +63,7 @@ class WeightEntryWidget extends StatelessWidget {
     Color color = review == Review.ok ? Constants.blue : (review == Review.good ? Constants.green : Constants.red);
 
     return SizedBox(
-      width: pointSystemConstant * 10, // just a random value
+      width: horizontalGrid.definedColumnWidth, // just a random value,
       child: Text(review.name, textAlign: TextAlign.right, style: GoogleFonts.inter(
         fontSize: pointSystemConstant * 2,
         fontWeight: FontWeight.w400,
@@ -55,12 +74,11 @@ class WeightEntryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     const borderWidth = 2.52 / Constants.ratio;
 
     return Container(
-      width: width,
-      height: height.toDouble(),
+      width: horizontalGrid.space,
+      height: grid.definedRowHeight + grid.gutter,
       decoration: BoxDecoration(
         border: Border(
           top: const BorderSide(color: Constants.borderGrey, width: borderWidth),
@@ -70,21 +88,38 @@ class WeightEntryWidget extends StatelessWidget {
       child: InkWell(
         onTap: () {
           if(onTap != null) {
-            onTap!(weightEntryModel);
+            onTap!();
           }
         },
         child: Material(
           color: Constants.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: pointSystemConstant * 4),
+            padding: EdgeInsets.symmetric(horizontal: horizontalGrid.margin),
             child: Row(
               children: [
-                dateTextWidget(weightEntryModel.value.date),
-                Text(weightAsText(weightEntryModel.value.weight) + weightEntryModel.value.weightUnit.name, style: GoogleFonts.inter(
+                dateTextWidget(
+                  dateTime: dateTime,
+                  dateTimeRange: dateTimeRange
+                ),
+                average ? Column(
+                  children: [
+                    Text("avg.", style: GoogleFonts.inter(
+                      fontSize: pointSystemConstant * 2,
+                      fontWeight: FontWeight.w400,
+                      color: Constants.black50
+                    )),
+                    SizedBox(height: pointSystemConstant),
+                    Text(weightAsText(weight) + weightUnit.name, style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w400,
+                      fontSize: pointSystemConstant * 3
+                    )),
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                ) : Text(weightAsText(weight) + weightUnit.name, style: GoogleFonts.inter(
                   fontWeight: FontWeight.w400,
                   fontSize: pointSystemConstant * 3
                 )),
-                reviewTextWidget(weightEntryModel.value.review != null ? weightEntryModel.value.review! : Review.ok)
+                reviewTextWidget(review)
               ],
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
             ),

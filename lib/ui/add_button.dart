@@ -6,14 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AddButton extends StatefulWidget {
   const AddButton({ 
     Key? key,
-    required this.elementHeight,
     required this.pointSystemConstant,
+    required this.grid,
     required this.weightSelectorInitialValue,
     required this.onSaveNewEntry
   }) : super(key:  key);
 
   final double pointSystemConstant;
-  final double elementHeight;
+  final DefinedVerticalGrid grid;
   final double Function() weightSelectorInitialValue;
   final void Function(double weight) onSaveNewEntry;
   
@@ -63,7 +63,7 @@ class _AddButtonState extends State<AddButton> {
     return AnimatedContainer(
       duration: duration,
       curve: curve,
-      height: stateOpened ? (widget.elementHeight * 2) + MediaQuery.of(context).padding.bottom : (widget.elementHeight),
+      height: stateOpened ? ((widget.grid.definedRowHeight + widget.grid.gutter) * 2) + MediaQuery.of(context).padding.bottom : (widget.grid.definedRowHeight + widget.grid.gutter),
       onEnd: () => animationDone = true,
       child: Align(
         alignment: Alignment.topCenter,
@@ -79,7 +79,7 @@ class _AddButtonState extends State<AddButton> {
           },
           child: Container(
               width: MediaQuery.of(context).size.width,
-              height: widget.elementHeight,
+              height: widget.grid.definedRowHeight + widget.grid.gutter,
               decoration: const BoxDecoration(
                 color: Constants.white,
                 border: Border(
@@ -119,9 +119,6 @@ class _AddButtonState extends State<AddButton> {
     );
   }
   Widget addButtonContent() {
-    const Duration duration = Duration(milliseconds: 2000);
-    const Curve curve = Curves.decelerate;
-
     return Column(
       key: stateOpened ? const ValueKey<int>(0) : const ValueKey<int>(1),
       children: [
@@ -146,7 +143,7 @@ class _AddButtonState extends State<AddButton> {
       children: [
         numberSelectorWidget(),
         Container(
-          height: widget.elementHeight + MediaQuery.of(context).padding.bottom,
+          height: widget.grid.definedRowHeight + widget.grid.gutter + MediaQuery.of(context).padding.bottom,
           width: MediaQuery.of(context).size.width,
           decoration: const BoxDecoration(
             border: Border(

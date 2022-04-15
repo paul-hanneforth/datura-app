@@ -4,7 +4,6 @@ import 'package:datura/ui/option.dart';
 import 'package:datura/ui/page_height.dart';
 import 'package:datura/util/grid.dart';
 import 'package:datura/util/mode.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 
@@ -23,8 +22,8 @@ class _OptionsPageState extends State<OptionsPage> {
     Navigator.of(context).pop();
   }
   void reset() {
-    showAlertDialogWidget(context, () {
-      resetData();
+    showAlertDialogWidget(context, () async {
+      await AppState.of(context).resetData();
       Navigator.of(context).pop();
     });
   }
@@ -134,7 +133,7 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
 
     setState(() => loading = true );
 
-    await setMode(newMode);
+    await AppState.of(context).switchMode(newMode);
 
     setState(() => loading = false );
   }

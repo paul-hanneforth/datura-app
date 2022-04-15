@@ -1,6 +1,7 @@
-import 'package:datura/pages/page2.dart';
-import 'package:datura/util/date.dart';
+import 'package:datura/pages/page.dart';
+import 'package:datura/util/faker.dart';
 import 'package:datura/util/firebase.dart' as firebase;
+import 'package:datura/util/id.dart';
 import 'package:datura/util/mode.dart';
 import 'package:datura/util/models.dart';
 import 'package:datura/util/review_engine.dart';
@@ -8,126 +9,20 @@ import 'package:datura/util/store.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sdcl/identifiables.dart' as sdcl;
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
-
-void setupModelDatabaseListeners(WeightEntriesModel model, Database db) {
-
-  model.addOnUpdateListener((weightEntryModel) async {
-    if(dbActiveReset) return;
-
-    await updateWeightEntry(db, weightEntryModel.value.id, weightEntryModel.value);
-
-    reviewAllWeightEntries();
-  });
-  model.addOnAddListener((weightEntryModel) async {
-    if(dbActiveReset) return;
-
-    await insertWeightEntry(db, weightEntryModel.value);
-
-    reviewAllWeightEntries();
-  });
-  model.addOnRemoveListener((weightEntryModel) async {
-    if(dbActiveReset) return;
-
-    await removeWeightEntry(db, weightEntryModel.value);
-
-    reviewAllWeightEntries();
-  });
-
-}
 Future<void> reviewWeightEntries(ReviewEngine engine, model) async {
 
   for(WeightEntryModel weightEntryModel in model.value) {
     final Review review = engine.review(weightEntryModel.value);
 
     if(weightEntryModel.value.review != review) {
-      print("set review to ${review.name} ${weightEntryModel.value}");
-      weightEntryModel.setReview(review);
+      weightEntryModel.set(weightEntryModel.value.copyWith(review: review));
     }
   }
 
-}
-
-Mode mode = Mode.production;
-String get databasePath => mode == Mode.development ? "dev.db" : "prod.db"; 
-
-bool dbActiveReset = false;
-Future<Database> dbFuture = openStoreDatabase(databasePath);
-WeightEntriesModel weightEntriesModel = WeightEntriesModel();
-ReviewEngine reviewEngine = ReviewEngine(weightEntries: []);
-
-Future<void> setMode(Mode newMode) async {
-  mode = newMode;
-  
-  await restartDB();
-
-  runApp(const MyApp());
-}
-Future<void> restartDB() async {
-  // notify other components that the database is being stopped
-  dbActiveReset = true;
-
-  (await dbFuture).close();
-  dbFuture = openStoreDatabase(databasePath);
-  await loadWeightEntriesIntoModel();
-
-  // notify other components that the database can be used again
-  dbActiveReset = false;
-}
-Future<void> resetData() async {
-  // notify other components that the database is being reset
-  dbActiveReset = true;
-
-  await wipeStoreDatabase(databasePath);
-
-  weightEntriesModel = WeightEntriesModel();
-
-  // restart database
-  dbFuture = openStoreDatabase(databasePath);
-
-  setupModelDatabaseListeners(weightEntriesModel, await dbFuture);
-
-  // notify other components that the database can be used again
-  dbActiveReset = false;
-
-  runApp(MyApp());
-}
-
-Future<void> reviewAllWeightEntries() async {
-  print("Reviewing all weight entries ...");
-
-  final List<WeightEntryModel> list = weightEntriesModel.value;
-  reviewEngine = ReviewEngine(weightEntries: list.map((weightEntryModel) => weightEntryModel.value).toList());
-  
-  reviewWeightEntries(reviewEngine, weightEntriesModel);
-
-}
-
-Future<void> loadWeightEntriesIntoModel() async {
-  // clear all previous weightEntries
-  final int length = weightEntriesModel.value.length;
-  for(int i = 0; i < length; i ++) {
-    weightEntriesModel.removeWeightEntry(weightEntriesModel.value[0]);
-  }
-
-  List<IndexedWeightEntry> weightEntries = await retrieveWeightEntries(await dbFuture);
-  print("loaded ${weightEntries.length} weightEntries");
-
-  for(final weightEntry in weightEntries) {
-    weightEntriesModel.addWeightEntry(weightEntry);
-  }
-
-  await reviewAllWeightEntries();
-}
-
-void setup() async {
-
-  await loadWeightEntriesIntoModel();
-
-  setupModelDatabaseListeners(weightEntriesModel, await dbFuture);
-  
 }
 
 Future<void> setupFirebase() async {
@@ -137,8 +32,15 @@ Future<void> setupFirebase() async {
   await firebase.setupCrashlytics();
 
   if(kDebugMode) {
-    print("DEBUG MODE!!!");
+    // await firebase.disableFirebaseTracking();
   }
+
+}
+Future<void> recordWeightEntryInFirebase(IndexedWeightEntry indexedWeightEntry) async {
+
+  final String? deviceId = await getDeviceId();
+  print(deviceId);
+  // final sdcl.Identifiable identifyUser = sdcl.Identifiable(value: );  
 
 }
 
@@ -146,8 +48,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await setupFirebase();
-
-  setup();
 
   //Setting SysemUIOverlay
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -170,11 +70,15 @@ class AppState extends InheritedWidget {
     Key? key,
     required this.model,
     required this.mode,
+    required this.switchMode,
+    required this.resetData,
     required Widget child,
   }) : super(key: key, child: child);
 
   final WeightEntriesModel model;
   final Mode mode;
+  final Future<void> Function(Mode newMode) switchMode;
+  final Future<void> Function() resetData;
 
   static AppState of(BuildContext context) {
     final AppState? result = context.dependOnInheritedWidgetOfExactType<AppState>();
@@ -183,25 +87,125 @@ class AppState extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(AppState old) {
-    print("AppState was modified! The Descendants will be notified!");
+  bool updateShouldNotify(AppState oldWidget) {
+    debugPrint("[main.dart] [AppState] AppState was modified! The Descendants will be notified!");
     return true;
   }
 
 } 
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+
+}
+
+class _MyAppState extends State<MyApp> {
+
+  Mode mode = kDebugMode ? Mode.development : Mode.production;
+  WeightEntriesModel model = WeightEntriesModel();
+  Database? db;
+
+  @override
+  void initState() {
+    super.initState();
+
+    asyncWrapper();
+  }
+  void asyncWrapper() async {
+
+    // load DB
+    db = await openStoreDatabase(databasePath(mode));
+
+    List<IndexedWeightEntry> loadedWeightEntries = await retrieveWeightEntries(db!);
+    
+    // load weightEntries into model
+    for(final weightEntry in loadedWeightEntries) {
+      model.addWeightEntry(weightEntry);
+    }
+
+    setupModelListeners(model, db!);
+
+  }
+  void setupModelListeners(WeightEntriesModel model, Database db) {
+
+    model.addOnUpdateListener((weightEntryModel) async => await updateWeightEntry(db, weightEntryModel.value.id, weightEntryModel.value));
+    model.addOnAddListener((weightEntryModel) async => await insertWeightEntry(db, weightEntryModel.value));
+    model.addOnRemoveListener((weightEntryModel) async => await removeWeightEntry(db, weightEntryModel.value));
+
+    model.addOnUpdateListener((weightEntryModel) => reviewAllWeightEntries());
+    model.addOnAddListener((weightEntryModel) => reviewAllWeightEntries());
+    model.addOnRemoveListener((weightEntryModel) => reviewAllWeightEntries());
+
+    // firebase
+    // model.addOnAddListener((weisghtEntryModel) => recordWeightEntryInFirebase(weightEntryModel.value));
+    // model.addOnUpdateListener((weightEntryModel) => recordWeightEntryInFirebase(weightEntryModel.value));
+
+  }
+  void reviewAllWeightEntries() {
+
+    final List<WeightEntryModel> list = model.value;
+    ReviewEngine reviewEngine = ReviewEngine(weightEntries: list.map((weightEntryModel) => weightEntryModel.value).toList());
+    reviewWeightEntries(reviewEngine, model);
+
+  }
+  Future<void> switchMode(Mode newMode) async {
+
+    Database newDB = await openStoreDatabase(databasePath(newMode));
+    WeightEntriesModel newModel = WeightEntriesModel();
+
+    List<IndexedWeightEntry> loadedWeightEntries = await retrieveWeightEntries(newDB);
+    
+    // load weightEntries into model
+    for(final weightEntry in loadedWeightEntries) {
+      newModel.addWeightEntry(weightEntry);
+    }
+
+    setupModelListeners(newModel, newDB);
+
+    reviewAllWeightEntries();
+
+    setState(() {
+      mode = newMode;
+      db = newDB;
+      model = newModel;
+    });
+  }
+  Future<void> resetData() async {
+
+    model.disposeAllListeners();
+
+    if(db != null) await db!.close();
+
+    await wipeStoreDatabase(databasePath(mode));
+
+    Database newDB = await openStoreDatabase(databasePath(mode));
+    WeightEntriesModel newModel = WeightEntriesModel();
+
+    setupModelListeners(newModel, newDB);
+
+    setState(() {
+      db = newDB;
+      model = newModel;
+    });
+
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint("[main.dart] [MyApp] Rebuilding entire App!");
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown
     ]);
     return AppState(
-      model: weightEntriesModel,
+      model: model,
       mode: mode,
+      switchMode: switchMode,
+      resetData: resetData,
       child: MaterialApp(
         title: 'Datura',
         debugShowCheckedModeBanner: false,
@@ -212,4 +216,5 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+
 }

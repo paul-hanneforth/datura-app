@@ -1,24 +1,13 @@
-import 'package:datura/util/date.dart';
 import 'package:datura/util/rand.dart';
-import 'package:datura/util/store.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
 
 class WeightEntryModel extends ValueNotifier<IndexedWeightEntry> {
 
   WeightEntryModel(value) : super(value);
-  
-  setReview(Review updatedReview) {
-    print("Updating Review from ${value.review} to ${updatedReview}!");
-    value = value.copyWith(review: updatedReview);
-  }
-  update(WeightEntry updatedEntry) {
-    value = value.copyWith(review: updatedEntry.review, weight: updatedEntry.weight, date: updatedEntry.date, weightUnit: updatedEntry.weightUnit);
-  }
 
-  @override
-  notifyListeners() {
-    super.notifyListeners();
+  set(WeightEntry updatedEntry) {
+    value = value.copyWith(review: updatedEntry.review, weight: updatedEntry.weight, date: updatedEntry.date, weightUnit: updatedEntry.weightUnit);
   }
 
 }
@@ -39,11 +28,10 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
   void removeOnAddListener(void Function(WeightEntryModel weightEntryModel) listener) => onAddListeners.remove(listener);
   void removeOnUpdateListener(void Function(WeightEntryModel ) listener) => onUpdateListeners.remove(listener);
 
-  @override
-  void notifyListeners() {
-    super.notifyListeners();
-
-    print("WeightEntriesModel.notifyListeners()");
+  void disposeAllListeners() {
+    onRemoveListeners.clear();
+    onAddListeners.clear();
+    onUpdateListeners.clear();
   }
 
   void addWeightEntry(IndexedWeightEntry indexedWeightEntry) {
@@ -56,7 +44,7 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
 
     value.add(weightEntryModel);
 
-    print("notifying ${onAddListeners.length} onAddListeners");
+    debugPrint("[models.dart] [WeightEntriesModel] notifying ${onAddListeners.length} onAddListeners");
 
     for(final listener in onAddListeners) {
       listener(weightEntryModel);
@@ -76,12 +64,10 @@ class WeightEntriesModel extends ValueNotifier<List<WeightEntryModel>> {
       listener(entry);
     }
 
-    print("notifying ${onAddListeners.length} onRemoveListeners");
-
     super.notifyListeners();
   }
 
-  WeightEntriesModelShadow shadow(DateTimeRange timeRange) {
+  WeightEntriesModelShadow createShadow(DateTimeRange timeRange) {
 
     final WeightEntriesModelShadow newModel = WeightEntriesModelShadow(shader: this, timeRange: timeRange);
 
@@ -117,10 +103,10 @@ class WeightEntriesModelShadow extends ValueNotifier<List<WeightEntryModel>> {
   void addWeightEntryModel(WeightEntryModel weightEntryModel) {
     int index = 0;
     for(final addedWeightEntryModel in value) {
-      if(addedWeightEntryModel.value.date.isBefore(weightEntryModel.value.date)) {
+      if(addedWeightEntryModel.value.date.isAfter(weightEntryModel.value.date)) {
         index++;
       }
-    }    
+    }
 
     value.insert(index, weightEntryModel);
 
@@ -158,20 +144,21 @@ class WeightEntriesModelShadow extends ValueNotifier<List<WeightEntryModel>> {
 
   @override
   void removeListener(void Function() listener) {
+    debugPrint("[models.dart] [WeightEntriesModelShadow] removeListener()");
+
     super.removeListener(listener);
 
     if(!hasListeners && mounted) {
-      print("This WeightEntriesModelShadow doesn't seem to have any listeners anymore. It will be automatically disposed.");
+      debugPrint("[models.dart] [WeightEntriesModelShadow] This WeightEntriesModelShadow doesn't seem to have any listeners anymore. It will be automatically disposed.");
       dispose();
     }
   }
 
   @override
   void dispose() {
-    print("WeightEntriesModelShadow.dispose()");
     if(!mounted) return;
 
-    // super.dispose();
+    super.dispose();
     disposeListeners();
 
     _mounted = false;

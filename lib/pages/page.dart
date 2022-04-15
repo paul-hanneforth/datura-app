@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:math';
 
 import 'package:datura/main.dart';
 import 'package:datura/pages/options_page.dart';
@@ -32,13 +32,11 @@ class MainPageScreen extends StatefulWidget {
 
 }
 
-const pointSystemConstant = 20.2 / Constants.ratio; // equals 8px
-const VerticalGrid grid = VerticalGrid(count: 8, gutter: (pointSystemConstant * 2), margin: 0);
-const HorizontalGrid horizontalGrid = HorizontalGrid(count: 3, gutter: (pointSystemConstant * 2), margin: (pointSystemConstant * 4));
-
 class _MainPageScreenState extends State<MainPageScreen> {
 
-  // WeightEntriesModel get weightEntriesModel => AppState.of(context).model;
+  static const pointSystemConstant = 20.2 / Constants.ratio; // equals 8px
+  static const VerticalGrid grid = VerticalGrid(count: 8, gutter: (pointSystemConstant * 2), margin: 0);
+  static const HorizontalGrid horizontalGrid = HorizontalGrid(count: 3, gutter: (pointSystemConstant * 2), margin: (pointSystemConstant * 4));
 
   BetterDateTimeRange timeRange = BetterDateTimeRange.today();
   WeightEntriesModelShadow modelShadow = WeightEntriesModelShadow();
@@ -49,15 +47,9 @@ class _MainPageScreenState extends State<MainPageScreen> {
     AppState.of(context).model.addUnindexedWeightEntry(Faker.weight().copyWith(date: BetterDateTime(), weight: weight));
 
     firebase.logAddWeightEntryEvent();
-
-    // update UI
-    updateTimeRange(timeRange);
   }
   void removeWeightEntry(WeightEntryModel weightEntryModel) {
     AppState.of(context).model.removeWeightEntry(weightEntryModel);
-
-    // update UI
-    updateTimeRange(timeRange);
   }
   void weightEntryOnTap(WeightEntryModel weightEntryModel) async {
     dynamic updatedWeightEntry = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => WeightEntryPage(weightEntry: weightEntryModel.value)));
@@ -68,23 +60,14 @@ class _MainPageScreenState extends State<MainPageScreen> {
       lastDeletedWeightEntry = weightEntryModel.value;
 
       showDeleteRedoSnackbar();
-
-      // update UI
-      updateTimeRange(timeRange);
     } else if(updatedWeightEntry is WeightEntry) {
       // entry should be updated
-      weightEntryModel.update(updatedWeightEntry);
-      
-      // update UI
-      updateTimeRange(timeRange);
+      weightEntryModel.set(updatedWeightEntry);
     }
   }
   void restoreLastDeletedWeightEntry() {
-    print("Restoring Weight Entry ...");
-
     if(lastDeletedWeightEntry != null) {
       AppState.of(context).model.addWeightEntry(lastDeletedWeightEntry!);
-      updateTimeRange(timeRange);
     }
   }
   void showDeleteRedoSnackbar() {
@@ -132,21 +115,11 @@ class _MainPageScreenState extends State<MainPageScreen> {
   void initState() {
     super.initState();
 
-    print("initState (${widget.initialTimeRange.start.monthName})");
-
     timeRange = widget.initialTimeRange;
-
-    Future.delayed(const Duration(seconds: 0)).then((dynamic) {
-
-      // updateTimeRange(timeRange);
-
-    });
-
   }
   @override
   void dispose() {
     super.dispose();
-    print("Dispose! (${widget.initialTimeRange.start.monthName})");
 
     modelShadow.dispose();
   }
@@ -173,6 +146,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
         SliverPersistentHeader(
           pinned: true,
           delegate: HeaderDelegate(
+            grid: grid,
+            pointSystemConstant: pointSystemConstant,
             pageTopPadding: pageTopPadding(),
             onSelect: (DateTimeRange selectedTimeRange) {
               updateTimeRange(BetterDateTimeRange.fromDateTimeRange(selectedTimeRange));
@@ -187,11 +162,39 @@ class _MainPageScreenState extends State<MainPageScreen> {
             return SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  return WeightEntryWidget(
-                    height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
-                    weightEntryModel: weightEntries[index],
-                    bottomBorder: weightEntries.length == index + 1,
-                    onTap: weightEntryOnTap
+                  final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
+
+                  return Stack(
+                    children: [
+                      WeightEntryWidget(
+                        grid: grid.define(pageSafeAreaHeight()),
+                        horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
+                        pointSystemConstant: pointSystemConstant,
+                        review: indexedWeightEntry.review ?? Review.unset,
+                        weight: indexedWeightEntry.weight,
+                        weightUnit: indexedWeightEntry.weightUnit,
+                        average: false,
+                        dateTime: indexedWeightEntry.date,
+                        bottomBorder: weightEntries.length == index + 1,
+                        onTap: () => weightEntryOnTap(weightEntries[index]),
+                      ),
+                      /* Positioned(
+                        top: -(pointSystemConstant * 1.5),
+                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                        child: Transform.rotate(
+                          angle: -pi * 0.5,
+                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -(pointSystemConstant * 1.5),
+                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                        child: Transform.rotate(
+                          angle: -pi * 0.5,
+                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                        ),
+                      ), */
+                    ]
                   );
                 },
                 childCount: weightEntries.length
@@ -205,14 +208,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Build! (${widget.initialTimeRange.start.monthName})");
-
-    // dispose Listeners if modelShadow has been initialized with a shader
-    /* if(modelShadow.shader != null) {
-      modelShadow.disposeListeners();
-    } */
     // create new shadow based on new timeRange
-    modelShadow = AppState.of(context).model.shadow(timeRange);
+    modelShadow = AppState.of(context).model.createShadow(timeRange);
 
     return SafeArea(
       top: false,
@@ -223,7 +220,7 @@ class _MainPageScreenState extends State<MainPageScreen> {
             child: scrollableSectionWidget(),
           ),
           AddButton(
-            elementHeight: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+            grid: grid.define(pageSafeAreaHeight()),
             pointSystemConstant: pointSystemConstant,
             onSaveNewEntry: (double weight) {
               addWeightEntry(weight);
@@ -246,12 +243,17 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
 class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
-  HeaderDelegate({ 
+  HeaderDelegate({
+    required this.pointSystemConstant,
+    required this.grid,
     required this.pageTopPadding,
     required this.pageHeight,
     required this.timeRange,
     required this.onSelect,
   });
+
+  final double pointSystemConstant;
+  final VerticalGrid grid;
 
   final double pageTopPadding;
   final double pageHeight;
@@ -260,15 +262,15 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   void openOptionsPage(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => const OptionsPage()));
-  } 
+  }
 
   String timeRangeText(BetterDateTimeRange range) {
     // TODO
     if(timeRange.start.month == timeRange.end.month && timeRange.start.year == timeRange.end.year) {
       // timeRange spans over the same month
-      return BetterDateTime.fromDateTime(range.start).monthName;  
+      return range.start.monthName;  
     } else {
-      return BetterDateTime.fromDateTime(range.start).monthName;
+      return range.format(forHumans: true, padZeros: true, year: false);
     }
   }
 
@@ -303,11 +305,11 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
     final double headerWidth = MediaQuery.of(context).size.width;
     double spacing = pointSystemConstant * 2;
   
-    const double titleFontSize = pointSystemConstant * 4;
-    const double subtitleFontSize = pointSystemConstant * 2;
+    double titleFontSize = pointSystemConstant * 4;
+    double subtitleFontSize = pointSystemConstant * 2;
     final subtitleTextStyle = GoogleFonts.inter(fontSize: subtitleFontSize, fontWeight: FontWeight.w400, color: Constants.white);
 
-    const double dateTextWidgetsSpacing = pointSystemConstant;
+    double dateTextWidgetsSpacing = pointSystemConstant;
 
     return Center(
       child: SizedBox(
@@ -328,9 +330,9 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
                   date: BetterDateTime.fromDateTime(timeRange.start),
                   style: subtitleTextStyle
                 ),
-                const SizedBox(width: dateTextWidgetsSpacing),
+                SizedBox(width: dateTextWidgetsSpacing),
                 Text("-", style: subtitleTextStyle),
-                const SizedBox(width: dateTextWidgetsSpacing),
+                SizedBox(width: dateTextWidgetsSpacing),
                 dateTextWidget(
                   isFirstDate: false,
                   context: context,
@@ -349,14 +351,14 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   }
   Widget optionsButtonWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: (2 * pointSystemConstant), top: (2 * pointSystemConstant)),
+      padding: EdgeInsets.only(right: (2 * pointSystemConstant), top: (2 * pointSystemConstant)),
       child: Material(
         color: Constants.transparent,
         child: InkWell(
           onTap: () {
             openOptionsPage(context);
           },
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(pointSystemConstant * 3),
             child: Icon(Icons.more_vert, size: pointSystemConstant * 4, color: Constants.white),
           )
@@ -395,7 +397,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => (grid.rowHeight(pageHeight) * 2) + grid.gutter + pageTopPadding;
 
   @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate old) {
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
     return true;
   }
 

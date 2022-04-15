@@ -1,6 +1,10 @@
 import 'package:datura/util/date.dart';
 import 'package:datura/util/rand.dart';
 import 'package:datura/util/types.dart';
+import 'package:sdcl/health_data/health_data.dart' as sdcl;
+import 'package:sdcl/health_data/weight.dart' as sdcl;
+import 'package:sdcl/identifiables.dart' as sdcl;
+import 'package:sdcl/sdcl.dart' as sdcl;
 
 class Faker {
 
@@ -26,6 +30,25 @@ class Faker {
     int rand = Rand.randomNumberBetween(0, 3);
     Review review = rand == 2 ? Review.good : (rand == 1 ? Review.ok : Review.bad);
     return review;
+  }
+
+  static sdcl.Block block() {
+    final String randomString = Rand.getRandomString(10);
+
+    return sdcl.Block(
+      healthData: sdcl.HealthData(
+        weightList: [
+          sdcl.Weight(
+            weight: Rand.randomNumberBetween(50, 70),
+            date: BetterDateTime(),
+            weightUnit: sdcl.WeightUnit.kilogram,
+          )
+        ]
+      ),
+      identifiables: [
+        sdcl.Identifiable(value: randomString)
+      ]
+    );
   }
   
 }
