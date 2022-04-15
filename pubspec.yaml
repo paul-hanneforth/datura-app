@@ -46,6 +46,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^2.3.1
   sqflite: ^2.0.2
+  sdcl: ^0.0.1
+  device_info_plus: ^3.2.3
 
 dev_dependencies:
   flutter_test:
