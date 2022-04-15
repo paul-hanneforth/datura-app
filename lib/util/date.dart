@@ -61,6 +61,11 @@ class BetterDateTime extends DateTime {
   }
 
   bool isToday() => day == DateTime.now().day && month == DateTime.now().month && year == DateTime.now().year;
+  bool wasYesterday() {
+    final BetterDateTime todayDate = BetterDateTime();
+    final BetterDateTime yesterdaysDate = BetterDateTime.at(day: todayDate.day - 1, month: todayDate.month, year: todayDate.year);
+    return day == yesterdaysDate.day && month == yesterdaysDate.month && year == yesterdaysDate.year;
+  }
 
   BetterDateTime toDayStart() {
     final BetterDateTime dayStart = subtract(Duration(microseconds: microsecond))

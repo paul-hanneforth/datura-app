@@ -49,7 +49,13 @@ class WeightEntryWidget extends StatelessWidget {
   }) {
     assert((dateTime != null || dateTimeRange != null) && !(dateTime != null && dateTimeRange != null));
 
-    String text = dateTime != null ? dateTime.day.toString() + "th" : dateTimeRange!.format(forHumans: true);
+    String dateText(BetterDateTime dateTime) {
+      if(dateTime.isToday()) return "Today";
+      if(dateTime.wasYesterday()) return "Yesterday";
+      return dateTime.day.toString() + "th";
+    }
+
+    String text = dateTime != null ? dateText(dateTime) : dateTimeRange!.format(forHumans: true);
 
     return SizedBox(
       width: horizontalGrid.definedColumnWidth,
