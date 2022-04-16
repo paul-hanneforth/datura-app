@@ -34,6 +34,8 @@ Future<void> setupFirebase() async {
 
   await firebase.setupCrashlytics();
 
+  await firebase.setupRemoteConfig();
+
   if(kDebugMode) {
     await firebase.disableFirebaseTracking();
   }

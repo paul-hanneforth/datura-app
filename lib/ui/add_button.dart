@@ -96,7 +96,7 @@ class _AddButtonState extends State<AddButton> {
                   onPageChanged: (index) {
                     numberSelector.value = index / 10;
                   },
-                itemCount: 100 * 10,
+                  itemCount: 100 * 10,
                   itemBuilder: (BuildContext context, index) {
                     return Center(
                       child: ValueListenableBuilder(

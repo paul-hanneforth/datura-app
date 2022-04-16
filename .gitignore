@@ -2,6 +2,7 @@
 archived/
 android/key.properties
 android/upload-keystore.jks
+cmd/
 
 
 # Miscellaneous

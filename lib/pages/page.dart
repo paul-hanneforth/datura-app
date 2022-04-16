@@ -44,9 +44,10 @@ class _MainPageScreenState extends State<MainPageScreen> {
   IndexedWeightEntry? lastDeletedWeightEntry;
 
   void addWeightEntry(double weight) {
-    AppState.of(context).model.addUnindexedWeightEntry(Faker.weight().copyWith(date: BetterDateTime(), weight: weight));
+    final WeightEntry weightEntry = Faker.weight().copyWith(date: BetterDateTime(), weight: weight);
+    AppState.of(context).model.addUnindexedWeightEntry(weightEntry);
 
-    firebase.logAddWeightEntryEvent();
+    firebase.logAddWeightEntryEvent(weightEntry);
   }
   void removeWeightEntry(WeightEntryModel weightEntryModel) {
     AppState.of(context).model.removeWeightEntry(weightEntryModel);
