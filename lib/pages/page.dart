@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:datura/main.dart';
 import 'package:datura/pages/options_page.dart';
 import 'package:datura/pages/weight_entry_page.dart';

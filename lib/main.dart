@@ -1,9 +1,6 @@
 import 'package:datura/pages/page.dart';
 import 'package:datura/util/date.dart';
-import 'package:datura/util/faker.dart';
 import 'package:datura/util/firebase.dart' as firebase;
-import 'package:datura/util/id.dart';
-import 'package:datura/util/import.dart';
 import 'package:datura/util/mode.dart';
 import 'package:datura/util/models.dart';
 import 'package:datura/util/review_engine.dart';
@@ -12,7 +9,6 @@ import 'package:datura/util/store.dart';
 import 'package:datura/util/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
