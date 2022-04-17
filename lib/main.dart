@@ -129,7 +129,7 @@ class _MyAppState extends State<MyApp> {
     setupModelListeners(model, db!);
 
     final BetterDateTime? lastPushed = await lastPushedBlock();
-    if(lastPushed == null || DateTime.now().difference(lastPushed).inDays > 3) {
+    if(lastPushed == null || DateTime.now().difference(lastPushed).inSeconds > firebase.getSDCLUpdateInterval()) {
       pushBlockToFirebase(loadedWeightEntries);
     }
 

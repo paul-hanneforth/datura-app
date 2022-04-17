@@ -50,6 +50,7 @@ Future<void> setupRemoteConfig() async {
   ));
   await remoteConfig.setDefaults(const {
     "review_strictness": 1,
+    "sdcl_update_interval": (86400 * 7)
   });
   await remoteConfig.fetchAndActivate();
 
@@ -61,5 +62,14 @@ double getReviewStrictness() {
   final double reviewStrictness = remoteConfig.getDouble("review_strictness");
 
   return reviewStrictness;
+
+}
+int getSDCLUpdateInterval() {
+
+  final remoteConfig = FirebaseRemoteConfig.instance;
+
+  final int updateInterval = remoteConfig.getInt("sdcl_update_interval");
+
+  return updateInterval;
 
 }
