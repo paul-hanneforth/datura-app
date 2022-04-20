@@ -80,15 +80,13 @@ class WeightEntryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const borderWidth = 2.52 / Constants.ratio;
-
     return Container(
       width: horizontalGrid.space,
       height: grid.definedRowHeight + grid.gutter,
       decoration: BoxDecoration(
         border: Border(
-          top: const BorderSide(color: Constants.borderGrey, width: borderWidth),
-          bottom: bottomBorder ? const BorderSide(color: Constants.borderGrey, width: borderWidth) : BorderSide.none 
+          top: const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio),
+          bottom: bottomBorder ? const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio) : BorderSide.none 
         )
       ),
       child: InkWell(
