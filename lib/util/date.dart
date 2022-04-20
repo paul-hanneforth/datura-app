@@ -96,7 +96,15 @@ class BetterDateTime extends DateTime {
     return monthEnd;
   }
   BetterDateTime toYearStart() {
-    return BetterDateTime.fromDateTime(DateTime(year, 0, 0, 0, 0, 0, 0));
+    return BetterDateTime.fromDateTime(BetterDateTime.at(
+      year: year,
+      day: 1,
+      month: 1,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0
+    ));
   }
   BetterDateTime toYearEnd() {
     return BetterDateTime.fromDateTime(DateTime(year, 12, 31, 23, 59, 59, 999));
