@@ -41,7 +41,11 @@ Future<void> setupFirebase() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await setupFirebase();
+  try {
+    await setupFirebase();
+  } catch(e) {
+    debugPrint("Failed to setup firebase: $e");
+  }
 
   //Setting SysemUIOverlay
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
