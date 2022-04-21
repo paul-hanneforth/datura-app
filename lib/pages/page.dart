@@ -10,6 +10,7 @@ import 'package:datura/util/faker.dart';
 import 'package:datura/util/firebase.dart' as firebase;
 import 'package:datura/util/grid.dart';
 import 'package:datura/util/models.dart';
+import 'package:datura/util/review_engine.dart';
 import 'package:datura/util/types.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
@@ -19,11 +20,13 @@ class MainPageScreen extends StatefulWidget {
   const MainPageScreen({ 
     Key? key,
     required this.initialTimeRange,
-    this.onNewTimeRange
+    this.onNewTimeRange,
+    this.compress = false,
   }) : super(key: key);
 
   final BetterDateTimeRange initialTimeRange;
   final void Function(BetterDateTimeRange)? onNewTimeRange;
+  final bool compress;
 
   @override
   State<MainPageScreen> createState() => _MainPageScreenState();
@@ -157,46 +160,70 @@ class _MainPageScreenState extends State<MainPageScreen> {
         ),
         ValueListenableBuilder(
           valueListenable: modelShadow,
-          builder: (context, List<WeightEntryModel> weightEntries, widget) {
+          builder: (context, List<WeightEntryModel> weightEntries, _widget) {
             return SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
+                  if(widget.compress) {
 
-                  return Stack(
-                    children: [
-                      WeightEntryWidget(
-                        grid: grid.define(pageSafeAreaHeight()),
-                        horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
-                        pointSystemConstant: pointSystemConstant,
-                        review: indexedWeightEntry.review ?? Review.unset,
-                        weight: indexedWeightEntry.weight,
-                        weightUnit: indexedWeightEntry.weightUnit,
-                        average: false,
-                        dateTime: indexedWeightEntry.date,
-                        bottomBorder: weightEntries.length == index + 1,
-                        onTap: () => weightEntryOnTap(weightEntries[index]),
-                      ),
-                      /* Positioned(
-                        top: -(pointSystemConstant * 1.5),
-                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
-                        child: Transform.rotate(
-                          angle: -pi * 0.5,
-                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                    ReviewEngine engine = AppState.of(context).reviewEngine();
+                    List<List<IndexedWeightEntry>> segmentedWeightEntries = engine.segmentWeightEntries();
+                    List<IndexedWeightEntry> groupedWeightEntries = segmentedWeightEntries[index];
+                    groupedWeightEntries.sort((a, b) => a.date.compareTo(b.date));
+
+                    return WeightEntryWidget(
+                      grid: grid.define(pageSafeAreaHeight()),
+                      horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
+                      pointSystemConstant: pointSystemConstant,
+                      review: groupedWeightEntries[0].review ?? Review.unset,
+                      weight: (groupedWeightEntries.fold<num>(0, (acc, entry) => acc + entry.weight.toDouble()) / groupedWeightEntries.length).round(),
+                      weightUnit: WeightUnit.kilogram,
+                      average: false,
+                      dateTimeRange: BetterDateTimeRange(start: groupedWeightEntries[0].date, end: groupedWeightEntries[groupedWeightEntries.length - 1].date),
+                      bottomBorder: segmentedWeightEntries.length == index + 1,
+                      onTap: () => weightEntryOnTap(weightEntries[index]),
+                    );
+
+                  } else {
+ 
+                    final IndexedWeightEntry indexedWeightEntry =  weightEntries[index].value;
+
+                    return Stack(
+                      children: [
+                        WeightEntryWidget(
+                          grid: grid.define(pageSafeAreaHeight()),
+                          horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
+                          pointSystemConstant: pointSystemConstant,
+                          review: indexedWeightEntry.review ?? Review.unset,
+                          weight: indexedWeightEntry.weight,
+                          weightUnit: indexedWeightEntry.weightUnit,
+                          average: false,
+                          dateTime: indexedWeightEntry.date,
+                          bottomBorder: weightEntries.length == index + 1,
+                          onTap: () => weightEntryOnTap(weightEntries[index]),
                         ),
-                      ),
-                      Positioned(
-                        bottom: -(pointSystemConstant * 1.5),
-                        right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
-                        child: Transform.rotate(
-                          angle: -pi * 0.5,
-                          child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                        /* Positioned(
+                          top: -(pointSystemConstant * 1.5),
+                          right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                          child: Transform.rotate(
+                            angle: -pi * 0.5,
+                            child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                          ),
                         ),
-                      ), */
-                    ]
-                  );
+                        Positioned(
+                          bottom: -(pointSystemConstant * 1.5),
+                          right: horizontalGrid.define(MediaQuery.of(context).size.width).margin,
+                          child: Transform.rotate(
+                            angle: -pi * 0.5,
+                            child: Icon(Icons.forward, size: pointSystemConstant * 3)
+                          ),
+                        ), */
+                      ]
+                    );
+
+                  }
                 },
-                childCount: weightEntries.length
+                childCount: widget.compress ? AppState.of(context).reviewEngine().segmentWeightEntries().length : weightEntries.length
               ),
             );
           }
@@ -415,6 +442,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   List<BetterDateTimeRange> timeRanges = [];
+  BetterDateTimeRange customTimeRange = BetterDateTimeRange.thisYear();
+  List<BetterDateTimeRange> negativeTimeRanges = [];
 
   BetterDateTime shiftDate(BetterDateTime date, int shift) {
     if(shift > 0) {
@@ -430,41 +459,104 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
 
-    for(var i = 0; i < 12; i ++) {
+    /* for(var i = 0; i < 12; i ++) {
       BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, i - (BetterDateTime().month - 1)).toMonthStart();
       BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, i - (BetterDateTime().month - 1)).toMonthEnd();
 
       BetterDateTimeRange timeRange = BetterDateTimeRange(start: newStart, end: newEnd);
       timeRanges.add(timeRange);
-    }
+    } */
   }
+
+  final int initialPage = 100;
  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Constants.white,
       body: PageView.builder(
-        controller: PageController(initialPage: BetterDateTime().month - 1),
+        controller: PageController(initialPage: initialPage),
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, _index) {
+          final int index = _index - initialPage;
 
-          if(_index >= timeRanges.length) {
+          if(index == 0) {
+            return MainPageScreen(
+              initialTimeRange: customTimeRange,
+              compress: true,
+            );
+          }
+
+          if(index > 0) {
+
+            final int newIndex = (index - 1);
+
+            if(index >= timeRanges.length) {
+              BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, newIndex).toMonthStart();
+              BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, newIndex).toMonthEnd();
+              timeRanges.add(BetterDateTimeRange(start: newStart, end: newEnd));        
+            }
+
+            return MainPageScreen(
+              initialTimeRange: timeRanges[newIndex],
+              onNewTimeRange: (BetterDateTimeRange newTimeRange) {
+                timeRanges[newIndex] = newTimeRange;
+              }
+            );
+
+          } else if(index < 0) {
+
+            final int newIndex = (index.abs() - 1);
+
+            if(newIndex >= negativeTimeRanges.length) {
+              BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, -(newIndex + 1)).toMonthStart();
+              BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, -(newIndex + 1)).toMonthEnd();
+              negativeTimeRanges.add(BetterDateTimeRange(start: newStart, end: newEnd));   
+            }
+
+            return MainPageScreen(
+              initialTimeRange: negativeTimeRanges[newIndex],
+            );
+
+          }
+
+          return Material();
+ 
+
+
+          /* final int initialPage = 100;
+          final int index = _index - initialPage;
+
+          if(index == 0) {
+            return MainPageScreen(
+              initialTimeRange: BetterDateTimeRange.thisYear(),
+              compress: true,
+            );
+          }
+
+          if(index >= timeRanges.length) {
             BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, _index - (BetterDateTime().month - 1)).toMonthStart();
             BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, _index - (BetterDateTime().month - 1)).toMonthEnd();
             timeRanges.add(BetterDateTimeRange(start: newStart, end: newEnd));            
           }
 
+          if(index < 0) {
+            BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, index - (BetterDateTime().month - 1)).toMonthStart();
+            BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, index - (BetterDateTime().month - 1)).toMonthEnd();
+            negativeTimeRanges.add(BetterDateTimeRange(start: newStart, end: newEnd));
+          }
+
           // BetterDateTime newStart = shiftDate(BetterDateTimeRange.thisMonth().start, index).toMonthStart();
           // BetterDateTime newEnd = shiftDate(BetterDateTimeRange.thisMonth().end, index).toMonthEnd();
 
-          BetterDateTimeRange timeRange = timeRanges[_index]; // BetterDateTimeRange(start: newStart, end: newEnd);
+          BetterDateTimeRange timeRange = index >= 0 ? timeRanges[index] : negativeTimeRanges[index.abs()];
 
           return MainPageScreen(
             initialTimeRange: timeRange,
             onNewTimeRange: (BetterDateTimeRange newTimeRange) {
-              timeRanges[_index] = newTimeRange;
+              timeRanges[index] = newTimeRange;
             }
-          );
+          ); */
         },
       )
     );
