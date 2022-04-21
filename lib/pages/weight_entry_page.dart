@@ -1,5 +1,6 @@
 import 'package:datura/ui/constants.dart';
 import 'package:datura/ui/page_height.dart';
+import 'package:datura/ui/panel.dart';
 import 'package:datura/util/date.dart';
 import 'package:datura/util/grid.dart';
 import 'package:datura/util/types.dart';
@@ -153,14 +154,11 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
     required void Function() onDateChange,
     required void Function() onTimeChange,
   }) {
-    return Container(
+    return Panel(
       width: MediaQuery.of(context).size.width,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio),
-        )
-      ),
+      pointSystemConstant: pointSystemConstant,
+      bottomBorder: false,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: horizontalGrid.margin),
         child: Row(
@@ -197,15 +195,11 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
       return number.toStringAsFixed(0);
     }
 
-    return Container(
+    return Panel(
       width: MediaQuery.of(context).size.width,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
-      decoration: const BoxDecoration(
-        color: Constants.white,
-        border: Border(
-          top: BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio)
-        )
-      ),
+      pointSystemConstant: pointSystemConstant,
+      bottomBorder: false,
       child: PageView.builder(
         controller: PageController(initialPage: (numberSelector.value * 10).toInt(), viewportFraction: 0.2),
         scrollDirection: Axis.horizontal,
@@ -259,14 +253,11 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
     required void Function() onSave,
     required void Function() onDelete
   }) {
-    return Container(
+    return Panel(
       width: MediaQuery.of(context).size.width,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio),
-        )
-      ),
+      pointSystemConstant: pointSystemConstant,
+      bottomBorder: false,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: horizontalGrid.margin),
         child: Row(

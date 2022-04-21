@@ -326,8 +326,6 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
 
-  static const double borderWidth = 2.52 / Constants.ratio; 
-
   Widget dateTextWidget({ required context, required BetterDateTime date, required TextStyle style, required bool isFirstDate }) {
     return Material(
       color: Constants.transparent,

@@ -1,4 +1,5 @@
 import 'package:datura/ui/constants.dart';
+import 'package:datura/ui/panel.dart';
 import 'package:datura/util/date.dart';
 import 'package:datura/util/grid.dart';
 import 'package:datura/util/types.dart';
@@ -85,15 +86,11 @@ class WeightEntryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Panel(
       width: horizontalGrid.space,
       height: grid.definedRowHeight + grid.gutter,
-      decoration: BoxDecoration(
-        border: Border(
-          top: const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio),
-          bottom: bottomBorder ? const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio) : BorderSide.none 
-        )
-      ),
+      bottomBorder: bottomBorder,
+      pointSystemConstant: pointSystemConstant,
       child: InkWell(
         onTap: () {
           if(onTap != null) {

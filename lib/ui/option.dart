@@ -1,4 +1,5 @@
 import 'package:datura/ui/constants.dart';
+import 'package:datura/ui/panel.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 
@@ -33,15 +34,11 @@ class Option extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        child: Container(
+        child: Panel(
           width: MediaQuery.of(context).size.width,
           height: height,
-          decoration: BoxDecoration(
-            border: Border(
-              top: const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio),
-              bottom: bottomBorder ? const BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio) : BorderSide.none 
-            )
-          ),
+          pointSystemConstant: pointSystemConstant,
+          bottomBorder: bottomBorder,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: margin),
             child: Row(

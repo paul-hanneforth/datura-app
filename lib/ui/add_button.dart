@@ -1,4 +1,5 @@
 import 'package:datura/ui/constants.dart';
+import 'package:datura/ui/panel.dart';
 import 'package:datura/util/grid.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
@@ -22,8 +23,6 @@ class AddButton extends StatefulWidget {
 }
 
 class _AddButtonState extends State<AddButton> {
-
-  static const borderWidth = 2.52 / Constants.ratio;
 
   final ValueNotifier<double> numberSelector = ValueNotifier<double>(0);
 
@@ -77,15 +76,11 @@ class _AddButtonState extends State<AddButton> {
               stateOpened = false;
             });
           },
-          child: Container(
+          child: Panel(
               width: MediaQuery.of(context).size.width,
               height: widget.grid.definedRowHeight + widget.grid.gutter,
-              decoration: const BoxDecoration(
-                color: Constants.white,
-                border: Border(
-                  top: BorderSide(color: Constants.borderGrey, width: 2.52 / Constants.ratio)
-                )
-              ),
+              pointSystemConstant: widget.pointSystemConstant,
+              bottomBorder: false,
               child: AnimatedOpacity(
                 duration: duration,
                 curve: curve,
@@ -142,14 +137,11 @@ class _AddButtonState extends State<AddButton> {
       alignment: Alignment.bottomCenter,
       children: [
         numberSelectorWidget(),
-        Container(
+        Panel(
           height: widget.grid.definedRowHeight + widget.grid.gutter + MediaQuery.of(context).padding.bottom,
           width: MediaQuery.of(context).size.width,
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Constants.borderGrey, width: borderWidth),
-            )
-          ),
+          pointSystemConstant: widget.pointSystemConstant,
+          bottomBorder: false,
           child: Material(
             color: Constants.white,
             child: InkWell(
