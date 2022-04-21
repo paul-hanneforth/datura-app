@@ -71,7 +71,6 @@ class AppState extends InheritedWidget {
     required this.mode,
     required this.switchMode,
     required this.resetData,
-    required this.reviewEngine,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -79,7 +78,6 @@ class AppState extends InheritedWidget {
   final Mode mode;
   final Future<void> Function(Mode newMode) switchMode;
   final Future<void> Function() resetData;
-  final ReviewEngine Function() reviewEngine;
 
   static AppState of(BuildContext context) {
     final AppState? result = context.dependOnInheritedWidgetOfExactType<AppState>();
@@ -213,7 +211,6 @@ class _MyAppState extends State<MyApp> {
       mode: mode,
       switchMode: switchMode,
       resetData: resetData,
-      reviewEngine: () => ReviewEngine(weightEntries: model.value.map((weightEntryModel) => weightEntryModel.value).toList()),
       child: MaterialApp(
         title: 'Datura',
         debugShowCheckedModeBanner: false,
