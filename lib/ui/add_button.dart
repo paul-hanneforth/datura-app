@@ -9,12 +9,14 @@ class AddButton extends StatefulWidget {
     Key? key,
     required this.pointSystemConstant,
     required this.grid,
+    required this.horizontalGrid,
     required this.weightSelectorInitialValue,
     required this.onSaveNewEntry
   }) : super(key:  key);
 
   final double pointSystemConstant;
   final DefinedVerticalGrid grid;
+  final DefinedHorizontalGrid horizontalGrid;
   final double Function() weightSelectorInitialValue;
   final void Function(double weight) onSaveNewEntry;
   
@@ -77,7 +79,7 @@ class _AddButtonState extends State<AddButton> {
             });
           },
           child: Panel(
-              width: MediaQuery.of(context).size.width,
+              width: widget.horizontalGrid.space,
               height: widget.grid.definedRowHeight + widget.grid.gutter,
               pointSystemConstant: widget.pointSystemConstant,
               bottomBorder: false,
@@ -139,7 +141,7 @@ class _AddButtonState extends State<AddButton> {
         numberSelectorWidget(),
         Panel(
           height: widget.grid.definedRowHeight + widget.grid.gutter + MediaQuery.of(context).padding.bottom,
-          width: MediaQuery.of(context).size.width,
+          width: widget.horizontalGrid.space,
           pointSystemConstant: widget.pointSystemConstant,
           bottomBorder: false,
           child: Material(

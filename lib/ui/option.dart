@@ -1,5 +1,6 @@
 import 'package:datura/ui/constants.dart';
 import 'package:datura/ui/panel.dart';
+import 'package:datura/util/grid.dart';
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 
@@ -7,7 +8,8 @@ class Option extends StatelessWidget {
 
   const Option({ 
     Key? key,
-    required this.height,
+    required this.grid,
+    required this.horizontalGrid,
     required this.pointSystemConstant,
     required this.margin,
     this.bottomBorder = true,
@@ -18,7 +20,8 @@ class Option extends StatelessWidget {
     this.content
   }) : super(key: key);
 
-  final double height;
+  final DefinedVerticalGrid grid;
+  final DefinedHorizontalGrid horizontalGrid;
   final double pointSystemConstant;
   final double margin;
   final bool bottomBorder;
@@ -35,8 +38,8 @@ class Option extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Panel(
-          width: MediaQuery.of(context).size.width,
-          height: height,
+          width: horizontalGrid.space,
+          height: grid.definedRowHeight + grid.gutter,
           pointSystemConstant: pointSystemConstant,
           bottomBorder: bottomBorder,
           child: Padding(

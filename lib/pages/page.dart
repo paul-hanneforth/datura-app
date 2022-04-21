@@ -151,7 +151,8 @@ class _MainPageScreenState extends State<MainPageScreen> {
         SliverPersistentHeader(
           pinned: true,
           delegate: HeaderDelegate(
-            grid: grid,
+            grid: grid.define(pageSafeAreaHeight()),
+            horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
             pointSystemConstant: pointSystemConstant,
             pageTopPadding: pageTopPadding(),
             onSelect: (DateTimeRange selectedTimeRange) {
@@ -255,6 +256,7 @@ class _MainPageScreenState extends State<MainPageScreen> {
             child: scrollableSectionWidget(),
           ),
           AddButton(
+            horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
             grid: grid.define(pageSafeAreaHeight()),
             pointSystemConstant: pointSystemConstant,
             onSaveNewEntry: (double weight) {
@@ -281,6 +283,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   HeaderDelegate({
     required this.pointSystemConstant,
     required this.grid,
+    required this.horizontalGrid,
     required this.pageTopPadding,
     required this.pageHeight,
     required this.timeRange,
@@ -288,7 +291,8 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   final double pointSystemConstant;
-  final VerticalGrid grid;
+  final DefinedVerticalGrid grid;
+  final DefinedHorizontalGrid horizontalGrid;
 
   final double pageTopPadding;
   final double pageHeight;
@@ -338,7 +342,6 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
     );   
   }
   Widget headerWidget(BuildContext context, double shrinkOffset) {
-    final double headerWidth = MediaQuery.of(context).size.width;
     double spacing = pointSystemConstant * 2;
   
     double titleFontSize = pointSystemConstant * 4;
@@ -349,7 +352,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
     return Center(
       child: SizedBox(
-        width: headerWidth,
+        width: horizontalGrid.space,
         child: Column(
           children: [
             Text(timeRangeText(timeRange), style: GoogleFonts.inter(

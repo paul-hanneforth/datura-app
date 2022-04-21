@@ -83,7 +83,7 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: SizedBox(
           height: (2 * grid.rowHeight(pageSafeAreaHeight())) + grid.gutter,
-          width: MediaQuery.of(context).size.width,
+          width: horizontalGrid.define(MediaQuery.of(context).size.width).space,
           child: Center(
             child: Column(
               children: [
@@ -155,7 +155,7 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
     required void Function() onTimeChange,
   }) {
     return Panel(
-      width: MediaQuery.of(context).size.width,
+      width: horizontalGrid.define(MediaQuery.of(context).size.width).space,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
       pointSystemConstant: pointSystemConstant,
       bottomBorder: false,
@@ -196,7 +196,7 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
     }
 
     return Panel(
-      width: MediaQuery.of(context).size.width,
+      width: horizontalGrid.define(MediaQuery.of(context).size.width).space,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
       pointSystemConstant: pointSystemConstant,
       bottomBorder: false,
@@ -254,7 +254,7 @@ class _WeightEntryPageState extends State<WeightEntryPage> {
     required void Function() onDelete
   }) {
     return Panel(
-      width: MediaQuery.of(context).size.width,
+      width: horizontalGrid.define(MediaQuery.of(context).size.width).space,
       height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
       pointSystemConstant: pointSystemConstant,
       bottomBorder: false,

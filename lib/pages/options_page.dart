@@ -80,7 +80,7 @@ class _OptionsPageState extends State<OptionsPage> {
               delegate: HeaderDelegate(
                 pointSystemConstant: pointSystemConstant,
                 definedVerticalGrid: grid.define(pageSafeAreaHeight()),
-                horizontalGrid: horizontalGrid,
+                horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
                 onGoBack: goBack,
                 title: "Options",
               ),
@@ -88,7 +88,8 @@ class _OptionsPageState extends State<OptionsPage> {
             SliverList(
               delegate: SliverChildListDelegate([
                 Option(
-                  height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+                  grid: grid.define(pageSafeAreaHeight()),
+                  horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
                   margin: horizontalGrid.margin,
                   bottomBorder: true,
                   pointSystemConstant: pointSystemConstant,
@@ -97,7 +98,8 @@ class _OptionsPageState extends State<OptionsPage> {
                   onTap: reset
                 ),
                 Option(
-                  height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+                  grid: grid.define(pageSafeAreaHeight()),
+                  horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
                   margin: horizontalGrid.margin,
                   bottomBorder: true,
                   pointSystemConstant: pointSystemConstant,
@@ -162,7 +164,7 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
               delegate: HeaderDelegate(
                 pointSystemConstant: pointSystemConstant,
                 definedVerticalGrid: grid.define(pageSafeAreaHeight()),
-                horizontalGrid: horizontalGrid,
+                horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
                 onGoBack: () => goBack(context),
                 title: "Options",
                 subtitle: "Developer"
@@ -171,7 +173,8 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
             SliverList(
               delegate: SliverChildListDelegate([
                 Option(
-                  height: grid.rowHeight(pageSafeAreaHeight()) + grid.gutter,
+                  grid: grid.define(pageSafeAreaHeight()),
+                  horizontalGrid: horizontalGrid.define(MediaQuery.of(context).size.width),
                   margin: horizontalGrid.margin,
                   bottomBorder: true,
                   pointSystemConstant: pointSystemConstant,
@@ -202,7 +205,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   final double pointSystemConstant;
   final DefinedVerticalGrid definedVerticalGrid;
-  final HorizontalGrid horizontalGrid;
+  final DefinedHorizontalGrid horizontalGrid;
   final void Function() onGoBack;
   final String title;
   final String? subtitle;
@@ -212,7 +215,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width,
+      width: horizontalGrid.space,
       height: height,
       child: Stack(
         children: [
