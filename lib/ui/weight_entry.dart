@@ -19,7 +19,8 @@ class WeightEntryWidget extends StatelessWidget {
     this.weightUnit = WeightUnit.kilogram,
     this.average = false,
     this.bottomBorder = false,
-    this.onTap
+    this.onTap,
+    this.showMonth = false
   }) : assert((dateTime != null || dateTimeRange != null) && !(dateTime != null && dateTimeRange != null)), super(key: key);
 
   final double pointSystemConstant;
@@ -34,6 +35,7 @@ class WeightEntryWidget extends StatelessWidget {
   final BetterDateTime? dateTime;
   final BetterDateTimeRange? dateTimeRange;
   final void Function()? onTap;
+  final bool showMonth;
 
   String weightAsText(num weight) {
     if(weight % 1 != 0) {
@@ -45,13 +47,16 @@ class WeightEntryWidget extends StatelessWidget {
 
   Widget dateTextWidget({
     BetterDateTime? dateTime,
-    BetterDateTimeRange? dateTimeRange
+    BetterDateTimeRange? dateTimeRange,
+    bool month = false,
   }) {
     assert((dateTime != null || dateTimeRange != null) && !(dateTime != null && dateTimeRange != null));
 
     String dateText(BetterDateTime dateTime) {
       if(dateTime.isToday()) return "Today";
       if(dateTime.wasYesterday()) return "Yesterday";
+
+      if(month) return dateTime.format(padZeros: true, year: false, month: true, day: true);
       return dateTime.day.toString() + "th";
     }
 
@@ -103,7 +108,8 @@ class WeightEntryWidget extends StatelessWidget {
               children: [
                 dateTextWidget(
                   dateTime: dateTime,
-                  dateTimeRange: dateTimeRange
+                  dateTimeRange: dateTimeRange,
+                  month: showMonth
                 ),
                 average ? Column(
                   children: [

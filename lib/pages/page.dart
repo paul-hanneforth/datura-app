@@ -112,6 +112,9 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
+  void showTimeRangedWeightEntry(BetterDateTimeRange timeRange) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Scaffold(backgroundColor: Constants.white, body: MainPageScreen(initialTimeRange: timeRange))));
+  }
 
   @override
   void initState() {
@@ -166,10 +169,15 @@ class _MainPageScreenState extends State<MainPageScreen> {
                 (context, index) {
                   if(widget.compress) {
 
-                    ReviewEngine engine = AppState.of(context).reviewEngine();
-                    List<List<IndexedWeightEntry>> segmentedWeightEntries = engine.segmentWeightEntries();
+                    List<List<IndexedWeightEntry>> segmentedWeightEntries = ReviewEngine(weightEntries: weightEntries.map<IndexedWeightEntry>((e) => e.value).toList()).segmentWeightEntries();
+                    segmentedWeightEntries.sort((a, b) {
+                      a.sort((a1, b1) => a1.date.compareTo(b1.date));
+                      b.sort((a1, b1) => a1.date.compareTo(b1.date));
+                      return b[0].date.compareTo(a[0].date);
+                    });
                     List<IndexedWeightEntry> groupedWeightEntries = segmentedWeightEntries[index];
                     groupedWeightEntries.sort((a, b) => a.date.compareTo(b.date));
+                    final BetterDateTimeRange entriesTimeRange = BetterDateTimeRange(start: groupedWeightEntries[0].date, end: groupedWeightEntries[groupedWeightEntries.length - 1].date);
 
                     return WeightEntryWidget(
                       grid: grid.define(pageSafeAreaHeight()),
@@ -179,9 +187,9 @@ class _MainPageScreenState extends State<MainPageScreen> {
                       weight: (groupedWeightEntries.fold<num>(0, (acc, entry) => acc + entry.weight.toDouble()) / groupedWeightEntries.length).round(),
                       weightUnit: WeightUnit.kilogram,
                       average: false,
-                      dateTimeRange: BetterDateTimeRange(start: groupedWeightEntries[0].date, end: groupedWeightEntries[groupedWeightEntries.length - 1].date),
+                      dateTimeRange: entriesTimeRange,
                       bottomBorder: segmentedWeightEntries.length == index + 1,
-                      onTap: () => weightEntryOnTap(weightEntries[index]),
+                      onTap: () => showTimeRangedWeightEntry(entriesTimeRange),
                     );
 
                   } else {
@@ -198,6 +206,7 @@ class _MainPageScreenState extends State<MainPageScreen> {
                           weight: indexedWeightEntry.weight,
                           weightUnit: indexedWeightEntry.weightUnit,
                           average: false,
+                          showMonth: timeRange.duration > const Duration(days: 31),
                           dateTime: indexedWeightEntry.date,
                           bottomBorder: weightEntries.length == index + 1,
                           onTap: () => weightEntryOnTap(weightEntries[index]),
@@ -223,7 +232,7 @@ class _MainPageScreenState extends State<MainPageScreen> {
 
                   }
                 },
-                childCount: widget.compress ? AppState.of(context).reviewEngine().segmentWeightEntries().length : weightEntries.length
+                childCount: widget.compress ? ReviewEngine(weightEntries: weightEntries.map<IndexedWeightEntry>((e) => e.value).toList()).segmentWeightEntries().length : weightEntries.length
               ),
             );
           }
@@ -294,7 +303,10 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
     // TODO
     if(timeRange.start.month == timeRange.end.month && timeRange.start.year == timeRange.end.year) {
       // timeRange spans over the same month
-      return range.start.monthName;  
+
+      if(timeRange.start.day == timeRange.start.toMonthStart().day && timeRange.end.day == timeRange.end.toMonthEnd().day) return range.start.monthName;
+  
+      return "${timeRange.start.day} - ${timeRange.end.day} ${range.start.monthShorthand}.";
     } else {
       return range.format(forHumans: true, padZeros: true, year: false);
     }
