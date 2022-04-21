@@ -38,7 +38,7 @@ class BetterDateTime extends DateTime {
     // return hour.toString() + ":" + minute.toString() + ":" + millisecond.toString() + "@" + day.toString() + "." + month.toString() + "." + year.toString();
   }
   String get monthName {
-    List<String> months = [
+    const List<String> months = [
       'January',
       'February',
       'March',
@@ -51,6 +51,23 @@ class BetterDateTime extends DateTime {
       'October',
       'November',
       'December'
+    ];
+    return months.elementAt(month - 1);
+  }
+  String get monthShorthand {
+    const List<String> months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
     ];
     return months.elementAt(month - 1);
   }
